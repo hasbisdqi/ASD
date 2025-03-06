@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <string>
 using namespace std;
 
 struct song
@@ -10,8 +11,8 @@ struct song
     int year;
 };
 
-void menu(vector<song> &songs);
-void addSong(vector<song> &songs)
+int menu(song songs[], int &n, int capacity);
+void addSong(song songs[], int &n, int capacity)
 {
     cout << "Masukkan jumlah lagu yang ingin ditambahkan: ";
     int jumlah;
@@ -19,25 +20,30 @@ void addSong(vector<song> &songs)
     cin.ignore();
     cout << "\n";
 
-    for (int i = 0; i < jumlah; i++)
+    if (n + jumlah > capacity)
     {
-        song newSong;
-        cout << "Judul: ";
-        getline(cin, newSong.title);
-        cout << "Artis: ";
-        getline(cin, newSong.artist);
-        cout << "Genre: ";
-        getline(cin, newSong.genre);
-        cout << "Tahun: ";
-        cin >> newSong.year;
-        cin.ignore();
-
-        songs.push_back(newSong);
+        cout << "Jumlah lagu melebihi kapasitas. Maksimum lagu yang bisa ditambahkan: " << capacity - n << "\n\n";
+        return;
     }
+
+    for (int i = n; i < jumlah + n; i++)
+    {
+        cout << "Judul: ";
+        getline(cin, songs[i].title);
+        cout << "Artis: ";
+        getline(cin, songs[i].artist);
+        cout << "Genre: ";
+        getline(cin, songs[i].genre);
+        cout << "Tahun: ";
+        cin >> songs[i].year;
+        cin.ignore();
+        cout << "\n";
+    }
+    n += jumlah;
     cout << "\n";
 }
 
-void searchSong(vector<song> &songs)
+void searchSong(song songs[], int n)
 {
     string keyword;
     bool founded = false;
@@ -45,15 +51,15 @@ void searchSong(vector<song> &songs)
     cin.ignore();
     getline(cin, keyword);
 
-    for (const auto &s : songs)
+    for (int i = 0; i < n; i++)
     {
-        if (s.title == keyword)
+        if (songs[i].title == keyword)
         {
             cout << "Lagu ditemukan" << endl;
-            cout << "Judul: " << s.title << endl;
-            cout << "Artis: " << s.artist << endl;
-            cout << "Genre: " << s.genre << endl;
-            cout << "Tahun: " << s.year << endl;
+            cout << "Judul: " << songs[i].title << endl;
+            cout << "Artis: " << songs[i].artist << endl;
+            cout << "Genre: " << songs[i].genre << endl;
+            cout << "Tahun: " << songs[i].year << endl;
             founded = true;
             break;
         }
@@ -62,48 +68,72 @@ void searchSong(vector<song> &songs)
     {
         cout << "Lagu tidak ditemukan" << endl;
     }
-
-    cout << endl
-         << "Kembali ke menu? (y/n): ";
-    char back;
-    cin >> back;
-    if (back == 'y' || back == 'Y')
-    {
-        menu(songs);
-    }
-    else
-    {
-        cout << "Terima kasih" << endl;
-    }
 }
 
-void menu(vector<song> &songs)
+int menu(song songs[], int &n, int capacity)
 {
     int menu;
+    cout << "   Playlist Lagu" << endl;
+    cout << "====================" << "\n\n";
+
+    for (int i = 0; i < n - 1; i++)
+    {
+        for (int j = 0; j < n - 1 - i; j++)
+        {
+            if (songs[j].title > songs[j + 1].title)
+            {
+                swap(songs[j], songs[j + 1]);
+            }
+        }
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        cout << i + 1 << ". " << songs[i].title << " - " << songs[i].artist << "\n\n";
+    }
+
+    cout << "1. Tambah Lagu" << endl;
+    cout << "2. Cari Lagu" << endl;
+    cout << "3. Keluar" << endl;
+    cout << "Pilih menu: ";
+    cin >> menu;
+    cout << "\n";
+    return menu;
+}
+
+int main()
+{
+    const int capacity = 10;
+    song songs[capacity];
+    int n = 0; // Jumlah lagu saat ini
+    int choice;
+    int pilih;
     do
     {
-        cout << "   Playlist Lagu" << endl;
-        cout << "====================" << "\n\n";
-        for (size_t i = 0; i < songs.size(); i++)
-        {
-            cout << i + 1 << ". " << songs[i].title << " - " << songs[i].artist << "\n\n";
-        }
-
-        cout << "1. Tambah Lagu" << endl;
-        cout << "2. Cari Lagu" << endl;
-        cout << "3. Keluar" << endl;
-        cout << "Pilih menu: ";
-        cin >> menu;
-
-        switch (menu)
+        choice = menu(songs, n, capacity);
+        switch (choice)
         {
         case 1:
             cout << "Tambah Lagu" << endl;
-            addSong(songs);
+            addSong(songs, n, capacity);
             break;
         case 2:
             cout << "Cari Lagu" << endl;
-            searchSong(songs);
+            searchSong(songs, n);
+            while (pilih != 1)
+            {
+                cout << "1. Kembali" << endl;
+                cout << "Pilih menu: ";
+                cin >> pilih;
+                cout << "\n";
+                if (pilih == 1)
+                {
+                    system("CLS");
+                    pilih = 0;
+                    break;
+                }
+            }
+
             break;
         case 3:
             cout << "Keluar" << endl;
@@ -112,12 +142,7 @@ void menu(vector<song> &songs)
             cout << "Menu tidak tersedia" << endl;
             break;
         }
-    } while (menu != 3);
-}
+    } while (choice != 3);
 
-int main()
-{
-    vector<song> songs;
-    menu(songs);
     return 0;
 }
