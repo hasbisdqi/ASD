@@ -128,7 +128,11 @@ int main()
                 cout << "\n";
                 if (pilih == 1)
                 {
-                    system("CLS");
+                    #if defined(_WIN32) || defined(_WIN64)
+                                        system("CLS");
+                    #else
+                                        system("clear");
+                    #endif
                     pilih = 0;
                     break;
                 }
